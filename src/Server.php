@@ -88,10 +88,6 @@ class Server extends EventEmitter implements ServerInterface
         } else {
             $connection = new SecureConnection($socket, $this->loop);
             $connection->setProtocol($this->getSecureProtocolNumber($context));
-            $scope = $this;
-            $connection->on('connection', function ($dataConn) use ($scope) {
-                $scope->emit('connection', array($dataConn));
-            });
         }
 
         return $connection;
