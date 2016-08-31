@@ -25,9 +25,10 @@ class SecureConnection extends Connection
             }
             $this->isSecure = true;
             $this->emit('connection', array($this));
-            $this->on('close', function () use ($stream) {
+            $scope = $this;
+            $this->on('close', function () use ($scope, $stream) {
                 if (false === stream_socket_enable_crypto($stream, false)) {
-                    $this->err('Failed to gracefully shutdown a secure connection.');
+                    $scope->err('Failed to gracefully shutdown a secure connection.');
                 }
             });
         }
