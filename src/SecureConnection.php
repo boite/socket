@@ -25,6 +25,11 @@ class SecureConnection extends Connection
             }
             $this->isSecure = true;
             $this->emit('connection', array($this));
+            $this->on('close', function () use ($stream) {
+                if (false === stream_socket_enable_crypto($stream, false)) {
+                    $this->err('Failed to gracefully shutdown a secure connection.');
+                }
+            });
         }
 
         $data = fread($stream, $this->bufferSize);
