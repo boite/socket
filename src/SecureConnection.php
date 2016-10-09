@@ -13,7 +13,7 @@ class SecureConnection extends Connection
     public function handleData($stream)
     {
         if (! $this->isSecure) {
-            $enabled = stream_socket_enable_crypto($stream, true, $this->protocolNumber);
+            $enabled = @stream_socket_enable_crypto($stream, true, $this->protocolNumber);
             if ($enabled === false) {
                 $this
                     ->err('Failed to complete a secure handshake with the client.')
@@ -25,6 +25,12 @@ class SecureConnection extends Connection
             }
             $this->isSecure = true;
             $this->emit('connection', array($this));
+            $scope = $this;
+            $this->on('close', function () use ($scope, $stream) {
+                if (false === stream_socket_enable_crypto($stream, false)) {
+                    $scope->err('Failed to gracefully shutdown a secure connection.');
+                }
+            });
         }
 
         $data = fread($stream, $this->bufferSize);
